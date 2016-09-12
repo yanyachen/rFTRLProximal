@@ -21,6 +21,19 @@
 #'   \item \code{dt} a data.table with each mean and standard deviation stat for training set and test set
 #'   \item \code{pred} a numerical vector with predictions for each CV-fold for the model having been trained on the data in all other folds.
 #' }
+#' @examples
+#' library(FeatureHashing)
+#' library(data.table)
+#' library(rBayesianOptimization)
+#' data(ipinyou)
+#' m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[,-"IsClick", with = FALSE],
+#'                             hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
+#' ftrl_model_cv <- FTRLProx_cv(x = m.train, y = as.numeric(ipinyou.train$IsClick),
+#'                              family = "binomial",
+#'                              params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
+#'                              epoch = 10,
+#'                              folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5),
+#'                              eval = MLmetrics::AUC)
 #' @importFrom magrittr %>%
 #' @importFrom foreach %do%
 #' @importFrom stats sd

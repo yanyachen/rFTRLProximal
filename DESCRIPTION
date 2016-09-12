@@ -8,7 +8,7 @@ URL: http://github.com/yanyachen/rFTRLProximal
 BugReports: http://github.com/yanyachen/rFTRLProximal/issues
 Depends: R (>= 2.10)
 Imports: stats, utils, data.table (>= 1.9.6), Matrix, FeatureHashing,
-        magrittr, foreach, Rcpp, RcppArmadillo, RcppProgress
+        magrittr, foreach, Rcpp, RcppProgress
 Suggests: rBayesianOptimization, MLmetrics
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 License: GPL-2
@@ -16,4 +16,3 @@ LazyData: TRUE
 RoxygenNote: 5.0.1
 NeedsCompilation: no
 Maintainer: Yachen Yan <yanyachen21@gmail.com>
-Packaged: 2016-09-12 09:28:27 UTC; Administrator
