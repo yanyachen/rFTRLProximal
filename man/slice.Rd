@@ -12,7 +12,7 @@ slice(x, i)
 \item{i}{logical expression indicating elements or rows to keep.}
 }
 \value{
-A \code{dgCMatrix} containing the subset of rows that are selected.
+A transposed \code{dgCMatrix} containing the subset of rows that are selected.
 }
 \description{
 Returns subsets of a \code{dgCMatrix}.
