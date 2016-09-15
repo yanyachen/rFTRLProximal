@@ -18,6 +18,7 @@
 #'   If provided, use parallel foreach to fit each model. Must register parallel before hand, such as doParallel or others.
 #' @param verbose logical value. Indicating if the progress bar is displayed or not.
 #' @return a FTRL-Proximal linear model object
+#' @references H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)

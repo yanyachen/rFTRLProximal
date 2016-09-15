@@ -19,6 +19,7 @@
 #' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
 #' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 #' @return a FTRL-Proximal linear model object
+#' @references H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)

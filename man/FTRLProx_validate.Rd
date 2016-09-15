@@ -56,4 +56,7 @@ ftrl_model_val <- FTRLProx_validate(x = m.train, y = as.numeric(ipinyou.train$Is
                                     val_y = as.numeric(ipinyou.test$IsClick),
                                     eval = AUC, verbose = TRUE)
 }
+\references{
+H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
+}
 

@@ -21,6 +21,7 @@
 #'   \item \code{dt} a data.table with each mean and standard deviation stat for training set and test set
 #'   \item \code{pred} a numerical vector with predictions for each CV-fold for the model having been trained on the data in all other folds.
 #' }
+#' @references H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
 #' @examples
 #' library(FeatureHashing)
 #' library(data.table)

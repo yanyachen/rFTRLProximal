@@ -54,4 +54,7 @@ ftrl_model_cv <- FTRLProx_cv(x = m.train, y = as.numeric(ipinyou.train$IsClick),
                              folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5),
                              eval = AUC)
 }
+\references{
+H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
+}
 

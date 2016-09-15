@@ -58,4 +58,7 @@ pred_ftrl_bagging <- FTRLProx_predict(ftrl_model_bagging, newx = m.test)
 AUC(pred_ftrl, as.numeric(ipinyou.test$IsClick))
 AUC(pred_ftrl_bagging, as.numeric(ipinyou.test$IsClick))
 }
+\references{
+H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
+}
 
