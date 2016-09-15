@@ -19,7 +19,12 @@
 #' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
 #' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 #' @return a FTRL-Proximal linear model object
-#' @references H. Brendan McMahan. et al. 2013 \emph{Ad Click Prediction: a View from the Trenches}
+#' @references
+#' H. B. McMahan, G. Holt, D. Sculley, et al. "Ad click prediction: a view from the trenches".
+#' In: _The 19th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining,
+#' KDD 2013, Chicago, IL, USA, August 11-14, 2013_. Ed. by I. S.Dhillon, Y. Koren, R. Ghani,
+#' T. E. Senator, P. Bradley, R. Parekh, J. He, R. L. Grossman and R. Uthurusamy. ACM, 2013, pp. 1222-1230.
+#' DOI: 10.1145/2487575.2488200. <URL: \url{http://doi.acm.org/10.1145/2487575.2488200}>.
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)
