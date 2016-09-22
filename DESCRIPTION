@@ -19,6 +19,7 @@ License: GPL-2
 LazyData: TRUE
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Author: Yachen Yan [aut, cre]
-Maintainer: Yachen Yan <yanyachen21@gmail.com>
-Packaged: 2016-09-22 05:59:01 UTC; Administrator
+Author: YaChen Yan [aut, cre],
+  Ji Yang [aut]
+Maintainer: YaChen Yan <yanyachen21@gmail.com>
+Packaged: 2016-09-22 06:18:13 UTC; Administrator
