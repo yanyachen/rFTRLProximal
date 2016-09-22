@@ -6,9 +6,9 @@
 #' This function is used internally and is not intended for end-user direct usage.
 #'
 #' @param x a transposed \code{dgCMatrix} object.
-#' @param w an vector of linear model weights.
+#' @param w a vector of linear model weights.
 #' @param family link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.
-#' @return an vector of linear model predicted values
+#' @return a vector of linear model predicted values
 #' @keywords internal
 #' @export
 

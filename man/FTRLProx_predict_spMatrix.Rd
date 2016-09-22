@@ -9,12 +9,12 @@ FTRLProx_predict_spMatrix(x, w, family)
 \arguments{
 \item{x}{a transposed \code{dgCMatrix} object.}
 
-\item{w}{an vector of linear model weights.}
+\item{w}{a vector of linear model weights.}
 
 \item{family}{link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.}
 }
 \value{
-an vector of linear model predicted values
+a vector of linear model predicted values
 }
 \description{
 FTRLProx_predict_spMatrix predicts values based on linear model weights.

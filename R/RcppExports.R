@@ -9,9 +9,9 @@
 #' This function is used internally and is not intended for end-user direct usage.
 #'
 #' @param x a transposed \code{dgCMatrix} object.
-#' @param w an vector of linear model weights.
+#' @param w a vector of linear model weights.
 #' @param family link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.
-#' @return an vector of linear model predicted values
+#' @return a vector of linear model predicted values
 #' @export
 FTRLProx_predict_spMatrix <- function(x, w, family) {
     .Call('rFTRLProximal_FTRLProx_predict_spMatrix', PACKAGE = 'rFTRLProximal', x, w, family)
@@ -36,7 +36,7 @@ FTRLProx_predict_spMatrix <- function(x, w, family) {
 #' }
 #' @param epoch The number of iterations over training data to train the model.
 #' @param verbose logical value. Indicating if the progress bar is displayed or not.
-#' @return an vector of linear model weights
+#' @return a vector of linear model weights
 #' @export
 FTRLProx_train_spMatrix <- function(x, y, family, params, epoch, verbose) {
     .Call('rFTRLProximal_FTRLProx_train_spMatrix', PACKAGE = 'rFTRLProximal', x, y, family, params, epoch, verbose)

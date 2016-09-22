@@ -33,9 +33,9 @@ NumericVector Weight_Update(double alpha, double beta, double l1, double l2, Num
 //' This function is used internally and is not intended for end-user direct usage.
 //'
 //' @param x a transposed \code{dgCMatrix} object.
-//' @param w an vector of linear model weights.
+//' @param w a vector of linear model weights.
 //' @param family link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.
-//' @return an vector of linear model predicted values
+//' @return a vector of linear model predicted values
 //' @export
 // [[Rcpp::export]]
 NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::string family) {
@@ -71,7 +71,7 @@ NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::st
 //' }
 //' @param epoch The number of iterations over training data to train the model.
 //' @param verbose logical value. Indicating if the progress bar is displayed or not.
-//' @return an vector of linear model weights
+//' @return a vector of linear model weights
 //' @export
 // [[Rcpp::export]]
 NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::string family, List params, int epoch, bool verbose) {

@@ -1,7 +1,7 @@
-#' @title (Depreciated) FTRL-Proximal Linear Model Fitting Function
+#' @title (Depreciated) FTRL-Proximal Linear Model Validation Function
 #'
 #' @description
-#' FTRLProx.train.spMatrix estimates the weights of linear model using FTRL-Proximal Algorithm.
+#' FTRLProx_validate_spMatrix validates the performance of FTRL-Proximal online learning model.
 #' This function is an Pure R implementation.
 #' This function is used internally and is not intended for end-user direct usage.
 #'
@@ -16,12 +16,14 @@
 #'   \item \code{l2} L2 regularization parameter
 #' }
 #' @param epoch The number of iterations over training data to train the model.
-#' @param verbose logical value. Indicating if the progress bar is displayed or not.
-#' @return a vector of linear model weights
-#' @keywords internal
+#' @param val_x a transposed \code{dgCMatrix} for validation.
+#' @param val_y a vector containing labels for validation.
+#' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
+#' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
+#' @return a FTRL-Proximal linear model object
 #' @export
 
-FTRLProx.train.spMatrix <- function(x, y, family, params, epoch, verbose) {
+FTRLProx.validate.spMatrix <- function(x, y, family, params, epoch, val_x, val_y, eval, verbose) {
   # Family
   family <- match.arg(arg = family, choices = c("gaussian", "binomial", "poisson"))
   PredTransform <- switch(family,
@@ -43,6 +45,9 @@ FTRLProx.train.spMatrix <- function(x, y, family, params, epoch, verbose) {
   w <- numeric(nrow(x))
   # Model Prediction
   p <- numeric(length(y))
+  # Training and Validation Performance
+  eval_train <- numeric(epoch)
+  eval_val <- numeric(epoch)
   # Computing
   ## Weight Update Function
   weight_update <- function(alpha, beta, l1, l2, z, n) {
@@ -50,11 +55,6 @@ FTRLProx.train.spMatrix <- function(x, y, family, params, epoch, verbose) {
   }
   ## Non-Zero Feature Count for in spMatrix
   non_zero_count <- diff.default(x@p)
-  ## Initialize Progress Bar
-  if (verbose == TRUE) {
-    message("Model Computing:")
-    pb <- utils::txtProgressBar(min = counter <- 0, max = epoch * length(y), style = 3)
-  }
   for (r in 1:epoch) {
     for (t in seq_len(ncol(x))) {
       ## Non-Zero Feature Index in spMatrix
@@ -71,16 +71,15 @@ FTRLProx.train.spMatrix <- function(x, y, family, params, epoch, verbose) {
       s_i <- (sqrt(n[i] + g_i^2) - sqrt(n[i])) / alpha
       z[i] <- z[i] + g_i - s_i * w[i]
       n[i] <- n[i] + g_i^2
-      if (verbose == TRUE) {
-        ## Updating Progress Bar
-        utils::setTxtProgressBar(pb, value = counter <- counter + 1)
-      }
+    }
+    eval_train[r] <- eval(p, y)
+    eval_val[r] <- eval(FTRLProx.predict.spMatrix(val_x, w, family), val_y)
+    if (verbose == TRUE) {
+      paste("[", r, "]", " \t train: ", eval_train[r], " \t validation: ", eval_val[r], "\n", sep = "") %>% cat(.)
     }
   }
-  if (verbose == TRUE) {
-    ## Close Progress Bar
-    close(pb)
-  }
-  # Retrun FTRL Proximal Model Weight
-  return(w)
+  # Retrun FTRL Proximal Model Weight and Performance
+  return(list(weight = w,
+              eval_train = eval_train,
+              eval_val = eval_val))
 }

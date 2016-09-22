@@ -26,7 +26,7 @@ FTRLProx_train_spMatrix(x, y, family, params, epoch, verbose)
 \item{verbose}{logical value. Indicating if the progress bar is displayed or not.}
 }
 \value{
-an vector of linear model weights
+a vector of linear model weights
 }
 \description{
 FTRLProx_train_spMatrix estimates the weights of linear model using FTRL-Proximal Algorithm.
