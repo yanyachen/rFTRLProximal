@@ -20,11 +20,11 @@ library(data.table)
 library(FeatureHashing)
 data(ipinyou)
 m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
-                            hash.size = 2^10, signed.hash = FALSE, verbose = TRUE)
+                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
 ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
                              family = "binomial",
                              params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-                             epoch = 5, verbose = TRUE)
+                             epoch = 10, verbose = TRUE)
 FTRLProx.importance(ftrl_model)
 }
 
