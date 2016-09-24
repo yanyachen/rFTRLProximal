@@ -1,7 +1,7 @@
 #' @title FTRL-Proximal Linear Model Feature Importance Function
 #'
 #' @description
-#' FTRLProx.importance showes the most important features of FTRL-Proximal Linear Model.
+#' FTRLProx_importance showes the most important features of FTRL-Proximal Linear Model.
 #'
 #' @param model a FTRL-Proximal linear model object.
 #' @return A \code{data.table} of the features used in the model with their weight
@@ -15,13 +15,13 @@
 #'                              family = "binomial",
 #'                              params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
 #'                              epoch = 10, verbose = TRUE)
-#' FTRLProx.importance(ftrl_model)
+#' FTRLProx_importance(ftrl_model)
 #' @importFrom stats na.omit
 #' @importFrom magrittr %>% %T>%
 #' @importFrom data.table :=
 #' @export
 
-FTRLProx.importance <- function(model) {
+FTRLProx_importance <- function(model) {
   # Solve Hashing Collision
   Mapping_DT_Gen <- function(Mapping) {
     data.table::data.table(Index = Mapping,

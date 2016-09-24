@@ -21,6 +21,7 @@
 #' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
 #' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 #' @return a FTRL-Proximal linear model object
+#' @keywords internal
 #' @export
 
 FTRLProx.validate.spMatrix <- function(x, y, family, params, epoch, val_x, val_y, eval, verbose) {

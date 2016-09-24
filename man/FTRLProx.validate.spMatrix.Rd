@@ -40,4 +40,5 @@ FTRLProx_validate_spMatrix validates the performance of FTRL-Proximal online lea
 This function is an Pure R implementation.
 This function is used internally and is not intended for end-user direct usage.
 }
+\keyword{internal}
 
