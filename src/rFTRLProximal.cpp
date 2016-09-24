@@ -111,18 +111,18 @@ NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::stri
       // Non-Zero Feature Index for each sample
       IntegerVector i = x_i[non_zero_index];
       // Non-Zero Feature Value for each sample
-      NumericVector x_i = x_x[non_zero_index];
+      NumericVector x_t = x_x[non_zero_index];
       // Model Parameter
       NumericVector z_i = z[i];
       NumericVector n_i = n[i];
       // Computing Weight and Prediction
       NumericVector w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_i * w_i), family);
+      double p_t = PredTransform(sum(x_t * w_i), family);
       // Updating Weight and Prediction
       w[i] = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      NumericVector g_i = (p[t] - y[t]) * x_i;
+      NumericVector g_i = (p[t] - y[t]) * x_t;
       NumericVector s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
       NumericVector z_i_next = z_i + g_i - s_i * w_i;
       NumericVector n_i_next = n_i + pow(g_i, 2);
@@ -194,18 +194,18 @@ List FTRLProx_validate_spMatrix(arma::sp_mat x, NumericVector y, std::string fam
       // Non-Zero Feature Index for each sample
       IntegerVector i = x_i[non_zero_index];
       // Non-Zero Feature Value for each sample
-      NumericVector x_i = x_x[non_zero_index];
+      NumericVector x_t = x_x[non_zero_index];
       // Model Parameter
       NumericVector z_i = z[i];
       NumericVector n_i = n[i];
       // Computing Weight and Prediction
       NumericVector w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_i * w_i), family);
+      double p_t = PredTransform(sum(x_t * w_i), family);
       // Updating Weight and Prediction
       w[i] = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      NumericVector g_i = (p[t] - y[t]) * x_i;
+      NumericVector g_i = (p[t] - y[t]) * x_t;
       NumericVector s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
       NumericVector z_i_next = z_i + g_i - s_i * w_i;
       NumericVector n_i_next = n_i + pow(g_i, 2);
