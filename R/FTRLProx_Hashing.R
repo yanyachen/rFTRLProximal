@@ -23,9 +23,6 @@
 
 FTRLProx_Hashing <- function(formula = ~ ., data, hash.size, signed.hash, verbose = TRUE) {
   # Feature Hashing
-  if (verbose == TRUE) {
-    message("Feature Hashing:")
-  }
   x <- FeatureHashing::hashed.model.matrix(formula = formula,
                                            data = data, hash.size = hash.size, signed.hash = signed.hash,
                                            transpose = TRUE, create.mapping = TRUE, is.dgCMatrix = TRUE,
