@@ -31,7 +31,7 @@ FTRLProx_importance <- function(model) {
   Mapping_DT <- Mapping_DT_Gen(model$mapping)
   # Feature Importance Generation
   data.table::data.table(Index = seq_along(model$weight),
-                         Weight = as.numeric(model$weight)) %T>%
+                         Weight = model$weight) %T>%
     magrittr::extract(., j = "Feature" := match(get("Index"), Mapping_DT$Index) %>%
                         magrittr::extract(Mapping_DT$Feature, .), with = FALSE) %T>%
     magrittr::extract(., j = "Abs_Weight" := abs(get("Weight"))) %T>%
