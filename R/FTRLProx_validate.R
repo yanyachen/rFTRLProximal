@@ -53,7 +53,7 @@ FTRLProx_validate <- function(x, y, family = c("gaussian", "binomial", "poisson"
                                             val_x = val_x, val_y = val_y, eval = eval, verbose = verbose)
   weight_mat <- NULL
   # Model Object
-  FTRLProx <- list(weight = weight_perf$weight, weight_mat = weight_mat, mapping = mapping,
+  FTRLProx <- list(weight = as.numeric(weight_perf$weight), weight_mat = weight_mat, mapping = mapping,
                    family = family, params = params, epoch = epoch,
                    eval_train = weight_perf$eval_train, eval_val = weight_perf$eval_val)
   return(FTRLProx)

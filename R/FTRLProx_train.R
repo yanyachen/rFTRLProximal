@@ -67,7 +67,7 @@ FTRLProx_train <- function(x, y, family = c("gaussian", "binomial", "poisson"),
     weight <- Matrix::rowMeans(as.matrix(weight_mat))
   }
   # Model Object
-  FTRLProx <- list(weight = weight, weight_mat = weight_mat, mapping = mapping,
+  FTRLProx <- list(weight = as.numeric(weight), weight_mat = weight_mat, mapping = mapping,
                    family = family, params = params, epoch = epoch,
                    bagging_seeds = bagging_seeds, verbose = verbose)
   return(FTRLProx)

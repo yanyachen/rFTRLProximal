@@ -7,27 +7,27 @@
 using namespace Rcpp;
 
 // FTRLProx_predict_spMatrix
-NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::string family);
+arma::vec FTRLProx_predict_spMatrix(arma::sp_mat x, arma::vec w, const std::string family);
 RcppExport SEXP rFTRLProximal_FTRLProx_predict_spMatrix(SEXP xSEXP, SEXP wSEXP, SEXP familySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
     rcpp_result_gen = Rcpp::wrap(FTRLProx_predict_spMatrix(x, w, family));
     return rcpp_result_gen;
 END_RCPP
 }
 // FTRLProx_train_spMatrix
-NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::string family, List params, int epoch, bool verbose);
+arma::vec FTRLProx_train_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch, bool verbose);
 RcppExport SEXP rFTRLProximal_FTRLProx_train_spMatrix(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP paramsSEXP, SEXP epochSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< S4 >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< int >::type epoch(epochSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
@@ -36,14 +36,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // FTRLProx_validate_spMatrix
-List FTRLProx_validate_spMatrix(arma::sp_mat x, NumericVector y, std::string family, List params, int epoch, arma::sp_mat val_x, NumericVector val_y, Function eval, bool verbose);
+List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch, arma::sp_mat val_x, NumericVector val_y, Function eval, bool verbose);
 RcppExport SEXP rFTRLProximal_FTRLProx_validate_spMatrix(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP paramsSEXP, SEXP epochSEXP, SEXP val_xSEXP, SEXP val_ySEXP, SEXP evalSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
+    Rcpp::traits::input_parameter< S4 >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< int >::type epoch(epochSEXP);
     Rcpp::traits::input_parameter< arma::sp_mat >::type val_x(val_xSEXP);

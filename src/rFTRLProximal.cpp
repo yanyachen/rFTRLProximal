@@ -6,7 +6,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-double PredTransform(double x, std::string family) {
+double PredTransform(double x, const std::string family) {
   if (family == "gaussian") {
     return x;
   } else if (family == "binomial"){
@@ -18,10 +18,10 @@ double PredTransform(double x, std::string family) {
   }
 }
 
-NumericVector Weight_Update(double alpha, double beta, double l1, double l2, NumericVector z, NumericVector n) {
-  NumericVector eta = (beta + sqrt(n)) / alpha + l2;
-  NumericVector w = -1 / eta * (z - as<NumericVector>(sign(z)) * l1);
-  w[abs(z) <= l1] = 0;
+arma::vec Weight_Update(double alpha, double beta, double l1, double l2, arma::vec z, arma::vec n) {
+  arma::vec eta = (beta + sqrt(n)) / alpha + l2;
+  arma::vec w = (-1 / eta) % (z - sign(z) * l1);
+  w.elem(find(abs(z) <= l1)).zeros();
   return w;
 }
 
@@ -38,9 +38,8 @@ NumericVector Weight_Update(double alpha, double beta, double l1, double l2, Num
 //' @return a vector of linear model predicted values
 //' @export
 // [[Rcpp::export]]
-NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::string family) {
-  arma::vec p_vec = arma::vectorise(as<arma::rowvec>(w) * x);
-  NumericVector p = NumericVector(p_vec.begin(), p_vec.end());
+arma::vec FTRLProx_predict_spMatrix(arma::sp_mat x, arma::vec w, const std::string family) {
+  arma::vec p = arma::vectorise(as<arma::rowvec>(wrap(w)) * x);
   if (family == "gaussian") {
     return p;
   } else if (family == "binomial"){
@@ -48,7 +47,7 @@ NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::st
   } else if (family == "poisson") {
     return exp(p);
   } else {
-    return NumericVector(p.length());
+    return arma::vec(p.size());
   }
 }
 
@@ -74,31 +73,29 @@ NumericVector FTRLProx_predict_spMatrix(arma::sp_mat x, NumericVector w, std::st
 //' @return a vector of linear model weights
 //' @export
 // [[Rcpp::export]]
-NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::string family, List params, int epoch, bool verbose) {
+arma::vec FTRLProx_train_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch, bool verbose) {
   // Hyperparameter
   double alpha = as<double>(params["alpha"]);
   double beta = as<double>(params["beta"]);
   double l1 = as<double>(params["l1"]);
   double l2 = as<double>(params["l2"]);
   // Design Matrix
-  IntegerVector x_Dim = IntegerVector::create(x.n_rows, x.n_cols);
-  IntegerVector x_p(x.col_ptrs, x.col_ptrs + x.n_cols + 1);
-  IntegerVector x_i(x.row_indices, x.row_indices + x.n_nonzero);
-  NumericVector x_x(x.values, x.values + x.n_nonzero);
+  arma::vec x_Dim = x.slot("Dim");
+  arma::vec x_p = x.slot("p");
+  arma::uvec x_i = x.slot("i");
+  arma::vec x_x = x.slot("x");
   //Model Initialization
-  NumericVector z(x_Dim[0]);
-  NumericVector n(x_Dim[0]);
-  NumericVector w(x_Dim[0]);
+  arma::vec z(x_Dim[0], fill::zeros);
+  arma::vec n(x_Dim[0], fill::zeros);
+  arma::vec w(x_Dim[0], fill::zeros);
   // Model Prediction
-  NumericVector p(x_Dim[1]);
-  // Computing
+  arma::vec p(x_Dim[1], fill::zeros);
+  // Training and Validation Performance
+  arma::vec eval_train(epoch, fill::zeros);
+  arma::vec eval_val(epoch, fill::zeros);
   // Non-Zero Feature Count for in spMatrix
-  IntegerVector non_zero_count = diff(x_p);
+  arma::vec non_zero_count = diff(x_p);
   // Initialize Progress Bar
-  if (verbose == true) {
-    Function msg("message");
-    msg(std::string("Model Computing:"));
-  }
   Progress pb (epoch * x_Dim[1], verbose);
   // Model Updating
   for (int r = 0; r < epoch; r++) {
@@ -107,28 +104,28 @@ NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::stri
     }
     for (int t = 0; t < y.size(); t++) {
       // Non-Zero Feature Index in spMatrix
-      IntegerVector non_zero_index = x_p[t] + seq_len(non_zero_count[t]) - 1;
+      arma::uvec non_zero_index = regspace<arma::uvec>(x_p[t], 1, x_p[t] + non_zero_count[t] - 1);
       // Non-Zero Feature Index for each sample
-      IntegerVector i = x_i[non_zero_index];
+      arma::uvec i = x_i.elem(non_zero_index);
       // Non-Zero Feature Value for each sample
-      NumericVector x_t = x_x[non_zero_index];
+      arma::vec x_t = x_x.elem(non_zero_index);
       // Model Parameter
-      NumericVector z_i = z[i];
-      NumericVector n_i = n[i];
+      arma::vec z_i = z.elem(i);
+      arma::vec n_i = n.elem(i);
       // Computing Weight and Prediction
-      NumericVector w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_t * w_i), family);
+      arma::vec w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
+      double p_t = PredTransform(sum(x_t % w_i), family);
       // Updating Weight and Prediction
-      w[i] = w_i;
+      w.elem(i) = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      NumericVector g_i = (p[t] - y[t]) * x_t;
-      NumericVector s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
-      NumericVector z_i_next = z_i + g_i - s_i * w_i;
-      NumericVector n_i_next = n_i + pow(g_i, 2);
+      arma::vec g_i = (p[t] - y[t]) * x_t;
+      arma::vec s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
+      arma::vec z_i_next = z_i + g_i - s_i % w_i;
+      arma::vec n_i_next = n_i + pow(g_i, 2);
       // Updating Model Parameter
-      z[i] = z_i_next;
-      n[i] = n_i_next;
+      z.elem(i) = z_i_next;
+      n.elem(i) = n_i_next;
       // Updating Progress Bar
       pb.increment();
     }
@@ -162,7 +159,7 @@ NumericVector FTRLProx_train_spMatrix(arma::sp_mat x, NumericVector y, std::stri
 //' @return a FTRL-Proximal linear model object
 //' @export
 // [[Rcpp::export]]
-List FTRLProx_validate_spMatrix(arma::sp_mat x, NumericVector y, std::string family, List params, int epoch,
+List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch,
                                 arma::sp_mat val_x, NumericVector val_y, Function eval, bool verbose) {
   // Hyperparameter
   double alpha = as<double>(params["alpha"]);
@@ -170,48 +167,47 @@ List FTRLProx_validate_spMatrix(arma::sp_mat x, NumericVector y, std::string fam
   double l1 = as<double>(params["l1"]);
   double l2 = as<double>(params["l2"]);
   // Design Matrix
-  IntegerVector x_Dim = IntegerVector::create(x.n_rows, x.n_cols);
-  IntegerVector x_p(x.col_ptrs, x.col_ptrs + x.n_cols + 1);
-  IntegerVector x_i(x.row_indices, x.row_indices + x.n_nonzero);
-  NumericVector x_x(x.values, x.values + x.n_nonzero);
+  arma::vec x_Dim = x.slot("Dim");
+  arma::vec x_p = x.slot("p");
+  arma::uvec x_i = x.slot("i");
+  arma::vec x_x = x.slot("x");
   //Model Initialization
-  NumericVector z(x_Dim[0]);
-  NumericVector n(x_Dim[0]);
-  NumericVector w(x_Dim[0]);
+  arma::vec z(x_Dim[0], fill::zeros);
+  arma::vec n(x_Dim[0], fill::zeros);
+  arma::vec w(x_Dim[0], fill::zeros);
   // Model Prediction
-  NumericVector p(x_Dim[1]);
+  arma::vec p(x_Dim[1], fill::zeros);
   // Training and Validation Performance
-  NumericVector eval_train(epoch);
-  NumericVector eval_val(epoch);
-  // Computing
+  arma::vec eval_train(epoch, fill::zeros);
+  arma::vec eval_val(epoch, fill::zeros);
   // Non-Zero Feature Count for in spMatrix
-  IntegerVector non_zero_count = diff(x_p);
+  arma::vec non_zero_count = diff(x_p);
   // Model Updating
   for (int r = 0; r < epoch; r++) {
     for (int t = 0; t < y.size(); t++) {
       // Non-Zero Feature Index in spMatrix
-      IntegerVector non_zero_index = x_p[t] + seq_len(non_zero_count[t]) - 1;
+      arma::uvec non_zero_index = regspace<arma::uvec>(x_p[t], 1, x_p[t] + non_zero_count[t] - 1);
       // Non-Zero Feature Index for each sample
-      IntegerVector i = x_i[non_zero_index];
+      arma::uvec i = x_i.elem(non_zero_index);
       // Non-Zero Feature Value for each sample
-      NumericVector x_t = x_x[non_zero_index];
+      arma::vec x_t = x_x.elem(non_zero_index);
       // Model Parameter
-      NumericVector z_i = z[i];
-      NumericVector n_i = n[i];
+      arma::vec z_i = z.elem(i);
+      arma::vec n_i = n.elem(i);
       // Computing Weight and Prediction
-      NumericVector w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_t * w_i), family);
+      arma::vec w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
+      double p_t = PredTransform(sum(x_t % w_i), family);
       // Updating Weight and Prediction
-      w[i] = w_i;
+      w.elem(i) = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      NumericVector g_i = (p[t] - y[t]) * x_t;
-      NumericVector s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
-      NumericVector z_i_next = z_i + g_i - s_i * w_i;
-      NumericVector n_i_next = n_i + pow(g_i, 2);
+      arma::vec g_i = (p[t] - y[t]) * x_t;
+      arma::vec s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
+      arma::vec z_i_next = z_i + g_i - s_i % w_i;
+      arma::vec n_i_next = n_i + pow(g_i, 2);
       // Updating Model Parameter
-      z[i] = z_i_next;
-      n[i] = n_i_next;
+      z.elem(i) = z_i_next;
+      n.elem(i) = n_i_next;
     }
     eval_train[r] = as<double>(eval(p, y));
     eval_val[r] = as<double>(eval(FTRLProx_predict_spMatrix(val_x, w, family), val_y));
