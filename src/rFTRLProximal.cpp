@@ -108,18 +108,18 @@ arma::vec FTRLProx_train_spMatrix(S4 x, arma::vec y, const std::string family, L
       // Non-Zero Feature Index for each sample
       arma::uvec i = x_i.elem(non_zero_index);
       // Non-Zero Feature Value for each sample
-      arma::vec x_t = x_x.elem(non_zero_index);
+      arma::vec x_t_i = x_x.elem(non_zero_index);
       // Model Parameter
       arma::vec z_i = z.elem(i);
       arma::vec n_i = n.elem(i);
       // Computing Weight and Prediction
       arma::vec w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_t % w_i), family);
+      double p_t = PredTransform(sum(x_t_i % w_i), family);
       // Updating Weight and Prediction
       w.elem(i) = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      arma::vec g_i = (p[t] - y[t]) * x_t;
+      arma::vec g_i = (p[t] - y[t]) * x_t_i;
       arma::vec s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
       arma::vec z_i_next = z_i + g_i - s_i % w_i;
       arma::vec n_i_next = n_i + pow(g_i, 2);
@@ -190,18 +190,18 @@ List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, Lis
       // Non-Zero Feature Index for each sample
       arma::uvec i = x_i.elem(non_zero_index);
       // Non-Zero Feature Value for each sample
-      arma::vec x_t = x_x.elem(non_zero_index);
+      arma::vec x_t_i = x_x.elem(non_zero_index);
       // Model Parameter
       arma::vec z_i = z.elem(i);
       arma::vec n_i = n.elem(i);
       // Computing Weight and Prediction
       arma::vec w_i = Weight_Update(alpha, beta, l1, l2, z_i, n_i);
-      double p_t = PredTransform(sum(x_t % w_i), family);
+      double p_t = PredTransform(sum(x_t_i % w_i), family);
       // Updating Weight and Prediction
       w.elem(i) = w_i;
       p[t] = p_t;
       // Computing Model Parameter of Next Round
-      arma::vec g_i = (p[t] - y[t]) * x_t;
+      arma::vec g_i = (p[t] - y[t]) * x_t_i;
       arma::vec s_i = (sqrt(n_i + pow(g_i, 2)) - sqrt(n_i)) / alpha;
       arma::vec z_i_next = z_i + g_i - s_i % w_i;
       arma::vec n_i_next = n_i + pow(g_i, 2);
