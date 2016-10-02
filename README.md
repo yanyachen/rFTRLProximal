@@ -1,7 +1,8 @@
 # rFTRLProximal
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/rFTRLProximal)](http://cran.r-project.org/package=rFTRLProximal)
-[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/rFTRLProximal)](http://cran.rstudio.com/web/packages/rFTRLProximal/index.html)
+[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/rFTRLProximal)](http://cran.r-project.org/package=rFTRLProximal)
+![CRAN Downloads Total](http://cranlogs.r-pkg.org/badges/grand-total/rFTRLProximal?color=brightgreen)
 Linux/Mac: [![Build Status](https://travis-ci.org/yanyachen/rFTRLProximal.svg)](https://travis-ci.org/yanyachen/rFTRLProximal)
 Windows: [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/yanyachen/rFTRLProximal?branch=master&svg=true)](https://ci.appveyor.com/project/yanyachen/rFTRLProximal)
 
