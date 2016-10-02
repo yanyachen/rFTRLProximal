@@ -17,6 +17,9 @@
 #' @param val_x a transposed \code{dgCMatrix} for validation.
 #' @param val_y a vector containing labels for validation.
 #' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
+#' @param patience The number of rounds with no improvement in the evaluation metric in order to stop the training.
+#'   User can specify 0 to disable early stopping.
+#' @param maximize whether to maximize the evaluation metric.
 #' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 #' @return a FTRL-Proximal linear model object
 #' @references
@@ -40,23 +43,26 @@
 #'                                     epoch = 20,
 #'                                     val_x = m.test,
 #'                                     val_y = as.numeric(ipinyou.test$IsClick),
-#'                                     eval = AUC, verbose = TRUE)
+#'                                     eval = AUC,
+#'                                     patience = 5, maximize = TRUE, verbose = TRUE)
 #' @export
 
 FTRLProx_validate <- function(x, y, family = c("gaussian", "binomial", "poisson"),
                               params = list(alpha = 0.1, beta = 1.0, l1 = 1.0, l2 = 1.0), epoch = 1,
-                              val_x, val_y, eval, verbose = TRUE) {
+                              val_x, val_y, eval,
+                              patience = 0, maximize = FALSE, verbose = TRUE) {
   # Feature Mapping
   mapping <- FeatureHashing::hash.mapping(x)
   # Model Computing
   weight_perf <- FTRLProx_validate_spMatrix(x = x, y = y, family = family, params = params, epoch = epoch,
-                                            val_x = val_x, val_y = val_y, eval = eval, verbose = verbose)
+                                            val_x = val_x, val_y = val_y, eval = eval,
+                                            patience = patience, maximize = maximize, verbose = verbose)
   weight_mat <- NULL
   # Model Object
   FTRLProx <- list(weight = as.numeric(weight_perf$weight), weight_mat = weight_mat, mapping = mapping,
                    family = family, params = params, epoch = epoch,
-                   eval_train = as.numeric(weight_perf$eval_train), 
-                   eval_val = as.numeric(weight_perf$eval_val))
+                   perf_train = as.numeric(weight_perf$perf_train),
+                   perf_val = as.numeric(weight_perf$perf_val))
   return(FTRLProx)
 }
 

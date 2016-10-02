@@ -63,10 +63,13 @@ FTRLProx_train_spMatrix <- function(x, y, family, params, epoch, verbose) {
 #' @param val_x a transposed \code{dgCMatrix} for validation.
 #' @param val_y a vector containing labels for validation.
 #' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
+#' @param patience The number of rounds with no improvement in the evaluation metric in order to stop the training.
+#'   User can specify 0 to disable early stopping.
+#' @param maximize whether to maximize the evaluation metric.
 #' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 #' @return a FTRL-Proximal linear model object
 #' @export
-FTRLProx_validate_spMatrix <- function(x, y, family, params, epoch, val_x, val_y, eval, verbose) {
-    .Call('rFTRLProximal_FTRLProx_validate_spMatrix', PACKAGE = 'rFTRLProximal', x, y, family, params, epoch, val_x, val_y, eval, verbose)
+FTRLProx_validate_spMatrix <- function(x, y, family, params, epoch, val_x, val_y, eval, patience, maximize, verbose) {
+    .Call('rFTRLProximal_FTRLProx_validate_spMatrix', PACKAGE = 'rFTRLProximal', x, y, family, params, epoch, val_x, val_y, eval, patience, maximize, verbose)
 }
 

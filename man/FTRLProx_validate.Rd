@@ -6,7 +6,7 @@
 \usage{
 FTRLProx_validate(x, y, family = c("gaussian", "binomial", "poisson"),
   params = list(alpha = 0.1, beta = 1, l1 = 1, l2 = 1), epoch = 1, val_x,
-  val_y, eval, verbose = TRUE)
+  val_y, eval, patience = 0, maximize = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{x}{a transposed \code{dgCMatrix}.}
@@ -31,6 +31,11 @@ FTRLProx_validate(x, y, family = c("gaussian", "binomial", "poisson"),
 
 \item{eval}{a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.}
 
+\item{patience}{The number of rounds with no improvement in the evaluation metric in order to stop the training.
+User can specify 0 to disable early stopping.}
+
+\item{maximize}{whether to maximize the evaluation metric.}
+
 \item{verbose}{logical value. Indicating if the validation result for each epoch is displayed or not.}
 }
 \value{
@@ -54,7 +59,8 @@ ftrl_model_val <- FTRLProx_validate(x = m.train, y = as.numeric(ipinyou.train$Is
                                     epoch = 20,
                                     val_x = m.test,
                                     val_y = as.numeric(ipinyou.test$IsClick),
-                                    eval = AUC, verbose = TRUE)
+                                    eval = AUC,
+                                    patience = 5, maximize = TRUE, verbose = TRUE)
 }
 \references{
 H. B. McMahan, G. Holt, D. Sculley, et al. "Ad click prediction: a view from the trenches".

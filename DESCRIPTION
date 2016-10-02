@@ -2,10 +2,7 @@ Package: rFTRLProximal
 Type: Package
 Title: FTRL-Proximal Algorithm
 Version: 1.0.0
-Authors@R: c(
-    person("YaChen", "Yan", email = "yanyachen21@gmail.com", role = c("aut", "cre")),
-    person("Ji", "Yang", email = "yangji063@gmail.com", role = "aut")
-    )
+Authors@R: person("YaChen", "Yan", email = "yanyachen21@gmail.com", role = c("aut", "cre"))
 Description: An efficient C++ based implementation of "Follow The (Proximally) Regularized Leader" online learning algorithm.
   This algorithm was proposed in McMahan et al. (2013) <DOI:10.1145/2487575.2488200>.
 URL: http://github.com/yanyachen/rFTRLProximal
@@ -19,7 +16,6 @@ License: GPL-2
 LazyData: TRUE
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Author: YaChen Yan [aut, cre],
-  Ji Yang [aut]
+Author: YaChen Yan [aut, cre]
 Maintainer: YaChen Yan <yanyachen21@gmail.com>
-Packaged: 2016-09-26 09:12:52 UTC; Administrator
+Packaged: 2016-10-02 01:22:58 UTC; Administrator

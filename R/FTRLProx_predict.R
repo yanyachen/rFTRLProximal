@@ -24,5 +24,6 @@
 
 FTRLProx_predict <- function(model, newx) {
   # Prediction
-  FTRLProx_predict_spMatrix(newx, model$weight, model$family)
+  FTRLProx_predict_spMatrix(newx, model$weight, model$family) %>%
+    as.numeric(.)
 }

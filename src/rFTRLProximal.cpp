@@ -39,7 +39,7 @@ arma::vec Weight_Update(double alpha, double beta, double l1, double l2, arma::v
 //' @export
 // [[Rcpp::export]]
 arma::vec FTRLProx_predict_spMatrix(arma::sp_mat x, arma::vec w, const std::string family) {
-  arma::vec p = arma::vectorise(as<arma::rowvec>(wrap(w)) * x);
+  arma::vec p = arma::vectorise(arma::conv_to<arma::rowvec>::from(w) * x);
   if (family == "gaussian") {
     return p;
   } else if (family == "binomial"){
@@ -155,12 +155,16 @@ arma::vec FTRLProx_train_spMatrix(S4 x, arma::vec y, const std::string family, L
 //' @param val_x a transposed \code{dgCMatrix} for validation.
 //' @param val_y a vector containing labels for validation.
 //' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
+//' @param patience The number of rounds with no improvement in the evaluation metric in order to stop the training.
+//'   User can specify 0 to disable early stopping.
+//' @param maximize whether to maximize the evaluation metric.
 //' @param verbose logical value. Indicating if the validation result for each epoch is displayed or not.
 //' @return a FTRL-Proximal linear model object
 //' @export
 // [[Rcpp::export]]
 List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch,
-                                arma::sp_mat val_x, NumericVector val_y, Function eval, bool verbose) {
+                                arma::sp_mat val_x, NumericVector val_y, Function eval,
+                                int patience, bool maximize, bool verbose) {
   // Hyperparameter
   double alpha = as<double>(params["alpha"]);
   double beta = as<double>(params["beta"]);
@@ -182,6 +186,8 @@ List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, Lis
   arma::vec eval_val(epoch, fill::zeros);
   // Non-Zero Feature Count for in spMatrix
   arma::vec non_zero_count = diff(x_p);
+  // Counter of Number of Rounds
+  int Round;
   // Model Updating
   for (int r = 0; r < epoch; r++) {
     for (int t = 0; t < y.size(); t++) {
@@ -211,12 +217,25 @@ List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, Lis
     }
     eval_train[r] = as<double>(eval(p, y));
     eval_val[r] = as<double>(eval(FTRLProx_predict_spMatrix(val_x, w, family), val_y));
+    Round = r;
     if (verbose == true) {
       Rcout << "[" << r+1 << "]"<< " \t train: " << eval_train[r] << " \t validation: " << eval_val[r] << std::endl;
     }
+    if (patience != 0 & r + 1 >= patience) {
+      if (maximize == true) {
+        int round_max = as<int>(wrap(eval_val.index_max()));
+        if (round_max <= r - patience) break;
+      } else {
+        int round_min = as<int>(wrap(eval_val.index_min()));
+        if (round_min <= r - patience) break;
+      }
+    }
   }
+  // Subset Evaluation Result to Performance
+  arma::vec perf_train = eval_train.subvec(0, Round);
+  arma::vec perf_val = eval_val.subvec(0, Round);
   // Retrun FTRL Proximal Model Weight and Performance
   return List::create(Named("weight") = w,
-                      Named("eval_train") = eval_train,
-                      Named("eval_val") = eval_val);
+                      Named("perf_train") = perf_train,
+                      Named("perf_val") = perf_val);
 }

@@ -5,7 +5,7 @@
 \title{FTRL-Proximal Linear Model Validation Function}
 \usage{
 FTRLProx_validate_spMatrix(x, y, family, params, epoch, val_x, val_y, eval,
-  verbose)
+  patience, maximize, verbose)
 }
 \arguments{
 \item{x}{a transposed \code{dgCMatrix}.}
@@ -29,6 +29,11 @@ FTRLProx_validate_spMatrix(x, y, family, params, epoch, val_x, val_y, eval,
 \item{val_y}{a vector containing labels for validation.}
 
 \item{eval}{a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.}
+
+\item{patience}{The number of rounds with no improvement in the evaluation metric in order to stop the training.
+User can specify 0 to disable early stopping.}
+
+\item{maximize}{whether to maximize the evaluation metric.}
 
 \item{verbose}{logical value. Indicating if the validation result for each epoch is displayed or not.}
 }

@@ -53,10 +53,11 @@ FTRLProx_cv <- function(x, y, family = c("gaussian", "binomial", "poisson"),
     FTRLProx <- FTRLProx_validate(x = slice(x, -folds[[i]]), y = y[-folds[[i]]], family = family,
                                   params = params, epoch = epoch,
                                   val_x = slice(x, folds[[i]]), val_y = y[folds[[i]]], eval = eval,
+                                  patience = 0, maximize = FALSE,
                                   verbose = FALSE)
     Pred <- FTRLProx_predict(FTRLProx, newx = slice(x, folds[[i]]))
-    Perf_Train <- FTRLProx$eval_train
-    Perf_Val <- FTRLProx$eval_val
+    Perf_Train <- FTRLProx$perf_train
+    Perf_Val <- FTRLProx$perf_val
     list(Pred = Pred, Perf_Train = Perf_Train, Perf_Val = Perf_Val)
   }
   ID_CV <- foreach::foreach(i = seq_along(folds), .combine = "c") %do% {
