@@ -2,7 +2,7 @@
 % Please edit documentation in R/FTRLProx_Matrix_Match.R
 \name{FTRLProx_Matrix_Match}
 \alias{FTRLProx_Matrix_Match}
-\title{Transform Sparse Design Matrix to Assigned Scheme}
+\title{Transform Sparse Design Matrix to Assigned Schema}
 \usage{
 FTRLProx_Matrix_Match(x, default_name)
 }
@@ -15,7 +15,7 @@ FTRLProx_Matrix_Match(x, default_name)
 an object of class "dgCMatrix"
 }
 \description{
-Transform a sparse "design" matrix to assigned scheme for FTRL-Proximal Algorithm.
+Transform a sparse "design" matrix to assigned schema for FTRL-Proximal Algorithm.
 }
 \examples{
 library(data.table)

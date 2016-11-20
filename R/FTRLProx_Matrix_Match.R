@@ -1,7 +1,7 @@
-#' @title Transform Sparse Design Matrix to Assigned Scheme
+#' @title Transform Sparse Design Matrix to Assigned Schema
 #'
 #' @description
-#' Transform a sparse "design" matrix to assigned scheme for FTRL-Proximal Algorithm.
+#' Transform a sparse "design" matrix to assigned schema for FTRL-Proximal Algorithm.
 #'
 #' @param x a \code{data.frame} or \code{data.table}. The original data.
 #' @param default_name the feature name of design matrix
