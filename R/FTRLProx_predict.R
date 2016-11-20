@@ -20,10 +20,21 @@
 #'                              epoch = 10, verbose = TRUE)
 #' pred_ftrl <- FTRLProx_predict(ftrl_model, newx = m.test)
 #' AUC(pred_ftrl, as.numeric(ipinyou.test$IsClick))
+#' @importFrom magrittr %>%
+#' @importFrom foreach %do%
 #' @export
 
 FTRLProx_predict <- function(model, newx) {
   # Prediction
-  FTRLProx_predict_spMatrix(newx, model$weight, model$family) %>%
-    as.numeric(.)
+  if (is.null(model$weight_mat) == TRUE) {
+    FTRLProx_predict_spMatrix(newx, model$weight, model$family) %>%
+      as.numeric(.)
+  } else {
+    foreach::foreach(i = seq_len(ncol(model$weight_mat)), .combine = "cbind") %do% {
+      FTRLProx_predict_spMatrix(newx, model$weight_mat[,i], model$family) %>%
+        as.numeric(.)
+    } %>%
+      Matrix::rowMeans(as.matrix(.))
+  }
 }
+utils::globalVariables(c("."))

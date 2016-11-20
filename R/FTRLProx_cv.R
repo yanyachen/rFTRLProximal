@@ -42,14 +42,14 @@
 #'                              folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5),
 #'                              eval = AUC)
 #' @importFrom magrittr %>%
-#' @importFrom foreach %do%
+#' @importFrom foreach %do% %dopar%
 #' @importFrom stats sd
 #' @export
 
 FTRLProx_cv <- function(x, y, family = c("gaussian", "binomial", "poisson"),
                         params = list(alpha = 0.1, beta = 1.0, l1 = 1.0, l2 = 1.0), epoch = 1,
                         folds, eval) {
-  Perf_Pred_List <- foreach::foreach(i = seq_along(folds)) %do% {
+  Perf_Pred_List <- foreach::foreach(i = seq_along(folds)) %dopar% {
     FTRLProx <- FTRLProx_validate(x = slice(x, -folds[[i]]), y = y[-folds[[i]]], family = family,
                                   params = params, epoch = epoch,
                                   val_x = slice(x, folds[[i]]), val_y = y[folds[[i]]], eval = eval,

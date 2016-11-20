@@ -27,6 +27,6 @@ FTRLProx_Hashing <- function(formula = ~ ., data, hash.size, signed.hash, verbos
                                            data = data, hash.size = hash.size, signed.hash = signed.hash,
                                            transpose = TRUE, create.mapping = TRUE, is.dgCMatrix = TRUE,
                                            progress = verbose)
-  # Return Design Sparse Matrix
+  # Return Sparse Design Matrix
   return(x)
 }
