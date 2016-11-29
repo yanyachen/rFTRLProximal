@@ -2,7 +2,7 @@
 % Please edit documentation in R/FTRLProx_as_Matrix.R
 \name{FTRLProx_as_Matrix}
 \alias{FTRLProx_as_Matrix}
-\title{Transform Data Frames Sparse Design Matrix for FTRL-Proximal Model}
+\title{Transform Data Frame to Sparse Design Matrix for FTRL-Proximal Model}
 \usage{
 FTRLProx_as_Matrix(data)
 }
@@ -13,7 +13,7 @@ FTRLProx_as_Matrix(data)
 an object of class "dgCMatrix"
 }
 \description{
-Transform a data frame to a sparse "design" matrix for FTRL-Proximal Algorithm.
+Transform a data frame to sparse "design" matrix for FTRL-Proximal Algorithm.
 Please always use this function to generate sparse matrix for training and prediction.
 }
 \examples{
