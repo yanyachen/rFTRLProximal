@@ -17,4 +17,3 @@ A transposed \code{dgCMatrix} containing the subset of rows that are selected.
 \description{
 Returns subsets of a \code{dgCMatrix}.
 }
-

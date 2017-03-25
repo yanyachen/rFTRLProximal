@@ -23,4 +23,3 @@ data(ipinyou)
 m.train <- FTRLProx_as_Matrix(ipinyou.train[, c("BiddingPrice", "PayingPrice"), with = FALSE])
 hash.mapping(m.train)
 }
-

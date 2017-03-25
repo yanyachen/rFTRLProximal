@@ -1,5 +1,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
+// #define ARMA_64BIT_WORD
 #include <RcppArmadillo.h>
 #include <progress.hpp>
 using namespace Rcpp;

@@ -33,4 +33,3 @@ FTRLProx_train_spMatrix estimates the weights of linear model using FTRL-Proxima
 This function is an C++ implementation.
 This function is used internally and is not intended for end-user direct usage.
 }
-

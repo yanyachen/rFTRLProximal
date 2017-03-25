@@ -34,4 +34,3 @@ This function is an Pure R implementation.
 This function is used internally and is not intended for end-user direct usage.
 }
 \keyword{internal}
-

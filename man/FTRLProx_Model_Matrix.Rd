@@ -29,4 +29,3 @@ f <- ~ 0 + BidID + IP + City + AdExchange + BiddingPrice + PayingPrice
 m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE])
 hash.mapping(m.train)
 }
-

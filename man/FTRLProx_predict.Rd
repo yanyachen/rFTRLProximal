@@ -32,4 +32,3 @@ ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick), fam
 pred_ftrl <- FTRLProx_predict(ftrl_model, newx = m.test)
 AUC(pred_ftrl, as.numeric(ipinyou.test$IsClick))
 }
-

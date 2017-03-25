@@ -27,4 +27,3 @@ ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
                              epoch = 10, verbose = TRUE)
 FTRLProx_importance(ftrl_model)
 }
-

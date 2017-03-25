@@ -27,4 +27,3 @@ m.train <- FTRLProx_Matrix_Match(m.train,
                                  c("AdExchange2", "AdExchange3", "BiddingPrice", "PayingPrice"))
 hash.mapping(m.train)
 }
-

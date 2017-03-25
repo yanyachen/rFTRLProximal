@@ -21,4 +21,3 @@ FTRLProx_predict_spMatrix predicts values based on linear model weights.
 This function is an C++ implementation.
 This function is used internally and is not intended for end-user direct usage.
 }
-

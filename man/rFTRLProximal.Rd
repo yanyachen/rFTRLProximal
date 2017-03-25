@@ -10,4 +10,3 @@ An efficient C++ based implementation of "Follow The (Proximally) Regularized Le
 online learning algorithm. This algorithm was proposed in McMahan et al. (2013)
 <DOI:10.1145/2487575.2488200>.
 }
-
