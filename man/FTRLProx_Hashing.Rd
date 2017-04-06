@@ -4,7 +4,8 @@
 \alias{FTRLProx_Hashing}
 \title{Feature Hashing for FTRL-Proximal Model}
 \usage{
-FTRLProx_Hashing(formula = ~., data, hash.size, signed.hash, verbose = TRUE)
+FTRLProx_Hashing(formula = ~., data, hash.size, signed.hash, verbose = TRUE,
+  label = NULL)
 }
 \arguments{
 \item{formula}{formula or a character vector of column names (will be expanded to a formula)}
@@ -17,9 +18,11 @@ FTRLProx_Hashing(formula = ~., data, hash.size, signed.hash, verbose = TRUE)
 This will reduce the impact of collision. Disable it will enhance the speed.}
 
 \item{verbose}{logical value. Indicating if the progress bar is displayed or not.}
+
+\item{label}{a vector containing labels.}
 }
 \value{
-an object of class "dgCMatrix"
+constructed dataset, an object of class "ftrl.Dataset"
 }
 \description{
 Feature Hashing for FTRL-Proximal Algorithm. A wrapper of \code{hashed.model.matrix} function in the FeatureHashing package.
@@ -30,7 +33,9 @@ library(data.table)
 library(FeatureHashing)
 data(ipinyou)
 m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
-                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
+                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                            label = as.numeric(ipinyou.train$IsClick))
 m.test <- FTRLProx_Hashing(~ 0 + ., ipinyou.test[,-"IsClick", with = FALSE],
-                           hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
+                           hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                           label = as.numeric(ipinyou.test$IsClick))
 }

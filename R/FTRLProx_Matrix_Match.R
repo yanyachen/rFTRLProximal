@@ -3,36 +3,38 @@
 #' @description
 #' Transform a sparse "design" matrix to assigned schema for FTRL-Proximal Algorithm.
 #'
-#' @param x a \code{data.frame} or \code{data.table}. The original data.
-#' @param default_name the feature name of design matrix
-#' @return an object of class "dgCMatrix"
+#' @param data a object of \code{ftrl.Dataset}.
+#' @param feature_name the feature name of design matrix
+#' @return constructed dataset, an object of class "ftrl.Dataset"
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)
 #' data(ipinyou)
 #' f <- ~ 0 + BidID + IP + City + AdExchange + BiddingPrice + PayingPrice
 #' m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE])
-#' m.train <- FTRLProx_Matrix_Match(m.train,
-#'                                  c("AdExchange2", "AdExchange3", "BiddingPrice", "PayingPrice"))
-#' hash.mapping(m.train)
+#' m.test <- FTRLProx_Model_Matrix(f, ipinyou.test[, -"IsClick", with = FALSE])
+#' identical(rownames(m.train$X), rownames(m.test$X))
+#' m.test <- FTRLProx_Matrix_Match(m.test, rownames(m.train$X))
+#' identical(rownames(m.train$X), rownames(m.test$X))
+#' m.test$Mapping
 #' @export
 
-FTRLProx_Matrix_Match <- function(x, default_name) {
+FTRLProx_Matrix_Match <- function(data, feature_name) {
   # Sparse Design Matrix
-  p_add <- setdiff(default_name, rownames(x))
+  p_add <- setdiff(feature_name, rownames(data$X))
   if (length(p_add) > 0) {
-    x <- rbind(x,
-               Matrix::Matrix(0, nrow = length(p_add), ncol = ncol(x),
+    X <- rbind(data$X,
+               Matrix::Matrix(0, nrow = length(p_add), ncol = ncol(data$X),
                               dimnames = list(p_add, NULL),
                               sparse = TRUE))
   }
-  x <- x[match(default_name, rownames(x)), , drop = FALSE]
+  X <- X[match(feature_name, rownames(X)), , drop = FALSE]
   # Create Mapping
-  Mapping <- (seq_len(nrow(x)) - 1) %>%
-    as.list(.) %>%
-    magrittr::set_names(., value = rownames(x)) %>%
-    as.environment(.)
-  attr(x, "mapping") <- Mapping
-  # Return Sparse Design Matrix
-  return(x)
+  Mapping <- data.table::data.table(Index = seq_len(nrow(X)),
+                                    Feature = rownames(X))
+  # Generating FTRLProx Dataset
+  FTRLProx_Dataset <- list(X = X, y = data$y, Mapping = Mapping)
+  class(FTRLProx_Dataset) <- "ftrl.Dataset"
+  # Return FTRLProx Dataset
+  return(FTRLProx_Dataset)
 }

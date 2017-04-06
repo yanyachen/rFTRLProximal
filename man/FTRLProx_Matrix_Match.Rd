@@ -4,15 +4,15 @@
 \alias{FTRLProx_Matrix_Match}
 \title{Transform Sparse Design Matrix to Assigned Schema}
 \usage{
-FTRLProx_Matrix_Match(x, default_name)
+FTRLProx_Matrix_Match(data, feature_name)
 }
 \arguments{
-\item{x}{a \code{data.frame} or \code{data.table}. The original data.}
+\item{data}{a object of \code{ftrl.Dataset}.}
 
-\item{default_name}{the feature name of design matrix}
+\item{feature_name}{the feature name of design matrix}
 }
 \value{
-an object of class "dgCMatrix"
+constructed dataset, an object of class "ftrl.Dataset"
 }
 \description{
 Transform a sparse "design" matrix to assigned schema for FTRL-Proximal Algorithm.
@@ -23,7 +23,9 @@ library(FeatureHashing)
 data(ipinyou)
 f <- ~ 0 + BidID + IP + City + AdExchange + BiddingPrice + PayingPrice
 m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE])
-m.train <- FTRLProx_Matrix_Match(m.train,
-                                 c("AdExchange2", "AdExchange3", "BiddingPrice", "PayingPrice"))
-hash.mapping(m.train)
+m.test <- FTRLProx_Model_Matrix(f, ipinyou.test[, -"IsClick", with = FALSE])
+identical(rownames(m.train$X), rownames(m.test$X))
+m.test <- FTRLProx_Matrix_Match(m.test, rownames(m.train$X))
+identical(rownames(m.train$X), rownames(m.test$X))
+m.test$Mapping
 }

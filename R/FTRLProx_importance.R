@@ -8,35 +8,32 @@
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)
+#' library(MLmetrics)
 #' data(ipinyou)
 #' m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
-#'                             hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
-#' ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
+#'                             hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+#'                             label = as.numeric(ipinyou.train$IsClick))
+#' m.test <- FTRLProx_Hashing(~ 0 + ., ipinyou.test[,-"IsClick", with = FALSE],
+#'                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+#'                            label = as.numeric(ipinyou.test$IsClick))
+#' ftrl_model <- FTRLProx_train(data = m.train, model = NULL,
 #'                              family = "binomial",
-#'                              params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-#'                              epoch = 10, verbose = TRUE)
+#'                              params = list(alpha = 0.01, beta = 0.1,
+#'                                            l1 = 0.1, l2 = 0.1, dropout = 0), epoch = 50,
+#'                              watchlist = list(test = m.test),
+#'                              eval = AUC, patience = 5, maximize = TRUE,
+#'                              nthread = 1, verbose = TRUE)
 #' FTRLProx_importance(ftrl_model)
-#' @importFrom stats na.omit
 #' @importFrom magrittr %>% %T>%
 #' @importFrom data.table :=
 #' @export
 
 FTRLProx_importance <- function(model) {
-  # Solve Hashing Collision
-  Mapping_DT_Gen <- function(Mapping) {
-    data.table::data.table(Index = Mapping,
-                           Feature = names(Mapping)) %>%
-      magrittr::extract(., j = .(Feature = paste(get("Feature"), collapse = "+")), by = "Index")
-  }
-  Mapping_DT <- Mapping_DT_Gen(model$mapping)
   # Feature Importance Generation
-  data.table::data.table(Index = seq_along(model$weight),
-                         Weight = model$weight) %T>%
-    magrittr::extract(., j = "Feature" := match(get("Index"), Mapping_DT$Index) %>%
-                        magrittr::extract(Mapping_DT$Feature, .), with = FALSE) %T>%
-    magrittr::extract(., j = "Abs_Weight" := abs(get("Weight"))) %T>%
-    data.table::setorderv(., cols = c("Abs_Weight", "Feature"), order = c(-1, +1)) %>%
-    magrittr::extract(., j = c("Feature", "Weight"), with = FALSE) %>%
-    na.omit(.)
+  data.table::data.table(Index = seq_len(nrow(model$state$w)),
+                         Weight = as.double(model$state$w)) %>%
+    merge(., model$mapping, by = "Index") %>%
+    magrittr::extract(., j = c("Feature", "Weight")) %>%
+    magrittr::extract(., i = order(abs(Weight), decreasing = TRUE))
 }
-utils::globalVariables(c("Index"))
+utils::globalVariables(c("Weight"))

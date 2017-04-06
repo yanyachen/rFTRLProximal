@@ -3,8 +3,8 @@
 #' @description
 #' An advanced interface for FTRL-Proximal online learning model cross validation.
 #'
-#' @param x a transposed \code{dgCMatrix}.
-#' @param y a vector containing labels.
+#' @param data a object of class \code{ftrl.Dataset}.
+#' @param model a previously built model object to continue the training from.
 #' @param family link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.
 #' @param params a list of parameters of FTRL-Proximal Algorithm.
 #' \itemize{
@@ -12,10 +12,15 @@
 #'   \item \code{beta} beta in the per-coordinate learning rate
 #'   \item \code{l1} L1 regularization parameter
 #'   \item \code{l2} L2 regularization parameter
+#'   \item \code{dropout} percentage of the input features to drop from each sample
 #' }
 #' @param epoch The number of iterations over training data to train the model.
 #' @param folds \code{list} provides a possibility of using a list of pre-defined CV folds (each element must be a vector of fold's indices).
-#' @param eval a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.
+#' @param eval a custimized evaluation function, the first argument shoule be prediction, the second argument shoule be label.
+#' @param patience The number of rounds with no improvement in the evaluation metric in order to stop the training. User can specify 0 to disable early stopping.
+#' @param maximize whether to maximize the evaluation metric.
+#' @param nthread number of parallel threads used to run ftrl. Please set to 1 if your feature set is not sparse enough.
+#' @param verbose logical value. Indicating if the progress bar is displayed or not.
 #' @return a list with the following elements is returned:
 #' \itemize{
 #'   \item \code{dt} a data.table with each mean and standard deviation stat for training set and test set
@@ -33,50 +38,77 @@
 #' library(rBayesianOptimization)
 #' library(MLmetrics)
 #' data(ipinyou)
-#' m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[,-"IsClick", with = FALSE],
-#'                             hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
-#' ftrl_model_cv <- FTRLProx_cv(x = m.train, y = as.numeric(ipinyou.train$IsClick),
+#' m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
+#'                             hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+#'                             label = as.numeric(ipinyou.train$IsClick))
+#' ftrl_model_cv <- FTRLProx_cv(data = m.train, model = NULL,
 #'                              family = "binomial",
-#'                              params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-#'                              epoch = 10,
-#'                              folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5),
-#'                              eval = AUC)
-#' @importFrom magrittr %>%
-#' @importFrom foreach %do% %dopar%
+#'                              params = list(alpha = 0.01, beta = 0.1,
+#'                                            l1 = 1.0, l2 = 1.0, dropout = 0), epoch = 50,
+#'                              folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5,
+#'                                            stratified = FALSE, seed = 0),
+#'                              eval = AUC, patience = 5, maximize = TRUE,
+#'                              nthread = 1, verbose = TRUE)
+#' @importFrom magrittr %>% %T>%
+#' @importFrom foreach %do%
 #' @importFrom stats sd
 #' @export
 
-FTRLProx_cv <- function(x, y, family = c("gaussian", "binomial", "poisson"),
+FTRLProx_cv <- function(data, model = NULL,
+                        family = c("gaussian", "binomial", "poisson"),
                         params = list(alpha = 0.1, beta = 1.0, l1 = 1.0, l2 = 1.0), epoch = 1,
-                        folds, eval) {
-  Perf_Pred_List <- foreach::foreach(i = seq_along(folds)) %dopar% {
-    FTRLProx <- FTRLProx_validate(x = slice(x, -folds[[i]]), y = y[-folds[[i]]], family = family,
-                                  params = params, epoch = epoch,
-                                  val_x = slice(x, folds[[i]]), val_y = y[folds[[i]]], eval = eval,
-                                  patience = 0, maximize = FALSE,
-                                  verbose = FALSE)
-    Pred <- FTRLProx_predict(FTRLProx, newx = slice(x, folds[[i]]))
-    Perf_Train <- FTRLProx$perf_train
-    Perf_Val <- FTRLProx$perf_val
-    list(Pred = Pred, Perf_Train = Perf_Train, Perf_Val = Perf_Val)
+                        folds, eval = NULL, patience = 0, maximize = NULL, nthread = 1, verbose = TRUE) {
+  # Model Initialization
+  if (is.null(model)) {
+    model_state_param <- list(state = NULL, family = family, params = params, mapping = data$Mapping)
+  } else {
+    stopifnot(identical(model$mapping, data$Mapping))
+    model_state_param <- list(state = model$state, family = model$family, params = model$params, mapping = model$mapping)
   }
-  ID_CV <- foreach::foreach(i = seq_along(folds), .combine = "c") %do% {
-    folds[[i]]
+  # CV Computing
+  FTRLProx_State_List <- lapply(X = seq_along(folds), FUN = function(i) model_state_param$state)
+  train_data_list <- lapply(X = seq_along(folds), FUN = function(i) slice(data, -folds[[i]]))
+  test_data_list <- lapply(X = seq_along(folds), FUN = function(i) slice(data, folds[[i]]))
+  Perf_CV <- lapply(X = 1:4, function(i) vector(mode = "double", length = epoch)) %>%
+    data.table::as.data.table(.) %T>%
+    data.table::setnames(., old = names(.), new = c("train_mean", "train_sd", "test_mean", "test_sd"))
+  for (i in seq_len(epoch)) {
+    for (j in seq_along(folds)) {
+      FTRLProx_State_List[[j]] <- FTRLProx_train_spMatrix(x = train_data_list[[j]]$X, y = train_data_list[[j]]$y,
+                                                          state = FTRLProx_State_List[[j]],
+                                                          family = model_state_param$family, params = model_state_param$params,
+                                                          epoch = 1, nthread = nthread, verbose = FALSE)
+    }
+    train_perf_vec <- foreach::foreach(j = seq_along(folds), .combine = "c") %do% {
+      eval(predict_spMatrix(train_data_list[[j]]$X, FTRLProx_State_List[[j]]$w, model_state_param$family),
+           train_data_list[[j]]$y)
+    }
+    test_perf_vec <- foreach::foreach(j = seq_along(folds), .combine = "c") %do% {
+      eval(predict_spMatrix(test_data_list[[j]]$X, FTRLProx_State_List[[j]]$w, model_state_param$family),
+           test_data_list[[j]]$y)
+    }
+    data.table::set(Perf_CV,
+                    i = as.integer(i),
+                    j = 1L:4L,
+                    value = list(mean(train_perf_vec), sd(train_perf_vec),
+                                 mean(test_perf_vec), sd(test_perf_vec)))
+    if (isTRUE(verbose)) {
+      Perf_Print(Round = i, Name = names(Perf_CV), Value = as.double(Perf_CV[i, ]))
+    }
+    if (patience != 0 & i > patience) {
+      if (isTRUE(maximize)) {
+        round_max <- which.max(Perf_CV[[3]])
+        if (round_max == i - patience) break;
+      } else {
+        round_min <- which.max(Perf_CV[[3]])
+        if (round_min == i - patience) break;
+      }
+    }
   }
-  Pred_CV <- foreach::foreach(i = seq_along(Perf_Pred_List), .combine = "c") %do% {
-    Perf_Pred_List[[i]]$Pred
-  } %>% magrittr::extract(., order(ID_CV))
-  Perf_Train_CV <- foreach::foreach(i = seq_along(Perf_Pred_List), .combine = "cbind") %do% {
-    Perf_Pred_List[[i]]$Perf_Train
-  }
-  Perf_Val_CV <- foreach::foreach(i = seq_along(Perf_Pred_List), .combine = "cbind") %do% {
-    Perf_Pred_List[[i]]$Perf_Val
-  }
-  Perf_CV = data.table::data.table(Train_Mean = apply(Perf_Train_CV, 1, mean),
-                                   Train_SD = apply(Perf_Train_CV, 1, sd),
-                                   Validation_Mean = apply(Perf_Val_CV, 1, mean),
-                                   Validation_SD = apply(Perf_Val_CV, 1, sd))
-  list(dt = Perf_CV,
+  Pred_CV <- foreach::foreach(j = seq_along(folds), .combine = "c") %do% {
+    predict_spMatrix(test_data_list[[j]]$X, FTRLProx_State_List[[j]]$w, model_state_param$family)
+  } %>% magrittr::extract(., order(unlist(folds)))
+  # Return Performance and OOB Prediction
+  list(dt = Perf_CV[seq_len(i), ],
        pred = Pred_CV)
 }
-utils::globalVariables(c("i", "."))

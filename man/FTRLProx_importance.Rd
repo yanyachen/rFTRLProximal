@@ -18,12 +18,20 @@ FTRLProx_importance showes the most important features of FTRL-Proximal Linear M
 \examples{
 library(data.table)
 library(FeatureHashing)
+library(MLmetrics)
 data(ipinyou)
 m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
-                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
-ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
+                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                            label = as.numeric(ipinyou.train$IsClick))
+m.test <- FTRLProx_Hashing(~ 0 + ., ipinyou.test[,-"IsClick", with = FALSE],
+                           hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                           label = as.numeric(ipinyou.test$IsClick))
+ftrl_model <- FTRLProx_train(data = m.train, model = NULL,
                              family = "binomial",
-                             params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-                             epoch = 10, verbose = TRUE)
+                             params = list(alpha = 0.01, beta = 0.1,
+                                           l1 = 0.1, l2 = 0.1, dropout = 0), epoch = 50,
+                             watchlist = list(test = m.test),
+                             eval = AUC, patience = 5, maximize = TRUE,
+                             nthread = 1, verbose = TRUE)
 FTRLProx_importance(ftrl_model)
 }

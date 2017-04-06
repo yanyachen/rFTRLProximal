@@ -4,14 +4,15 @@
 \alias{FTRLProx_cv}
 \title{FTRL-Proximal Linear Model Cross Validation}
 \usage{
-FTRLProx_cv(x, y, family = c("gaussian", "binomial", "poisson"),
-  params = list(alpha = 0.1, beta = 1, l1 = 1, l2 = 1), epoch = 1, folds,
-  eval)
+FTRLProx_cv(data, model = NULL, family = c("gaussian", "binomial",
+  "poisson"), params = list(alpha = 0.1, beta = 1, l1 = 1, l2 = 1),
+  epoch = 1, folds, eval = NULL, patience = 0, maximize = NULL,
+  nthread = 1, verbose = TRUE)
 }
 \arguments{
-\item{x}{a transposed \code{dgCMatrix}.}
+\item{data}{a object of class \code{ftrl.Dataset}.}
 
-\item{y}{a vector containing labels.}
+\item{model}{a previously built model object to continue the training from.}
 
 \item{family}{link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.}
 
@@ -21,13 +22,22 @@ FTRLProx_cv(x, y, family = c("gaussian", "binomial", "poisson"),
   \item \code{beta} beta in the per-coordinate learning rate
   \item \code{l1} L1 regularization parameter
   \item \code{l2} L2 regularization parameter
+  \item \code{dropout} percentage of the input features to drop from each sample
 }}
 
 \item{epoch}{The number of iterations over training data to train the model.}
 
 \item{folds}{\code{list} provides a possibility of using a list of pre-defined CV folds (each element must be a vector of fold's indices).}
 
-\item{eval}{a evaluation metrics computing function, the first argument shoule be prediction, the second argument shoule be label.}
+\item{eval}{a custimized evaluation function, the first argument shoule be prediction, the second argument shoule be label.}
+
+\item{patience}{The number of rounds with no improvement in the evaluation metric in order to stop the training. User can specify 0 to disable early stopping.}
+
+\item{maximize}{whether to maximize the evaluation metric.}
+
+\item{nthread}{number of parallel threads used to run ftrl. Please set to 1 if your feature set is not sparse enough.}
+
+\item{verbose}{logical value. Indicating if the progress bar is displayed or not.}
 }
 \value{
 a list with the following elements is returned:
@@ -45,14 +55,17 @@ library(data.table)
 library(rBayesianOptimization)
 library(MLmetrics)
 data(ipinyou)
-m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[,-"IsClick", with = FALSE],
-                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
-ftrl_model_cv <- FTRLProx_cv(x = m.train, y = as.numeric(ipinyou.train$IsClick),
+m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
+                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                            label = as.numeric(ipinyou.train$IsClick))
+ftrl_model_cv <- FTRLProx_cv(data = m.train, model = NULL,
                              family = "binomial",
-                             params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-                             epoch = 10,
-                             folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5),
-                             eval = AUC)
+                             params = list(alpha = 0.01, beta = 0.1,
+                                           l1 = 1.0, l2 = 1.0, dropout = 0), epoch = 50,
+                             folds = KFold(as.numeric(ipinyou.train$IsClick), nfolds = 5,
+                                           stratified = FALSE, seed = 0),
+                             eval = AUC, patience = 5, maximize = TRUE,
+                             nthread = 1, verbose = TRUE)
 }
 \references{
 H. B. McMahan, G. Holt, D. Sculley, et al. "Ad click prediction: a view from the trenches".

@@ -4,17 +4,19 @@
 \alias{FTRLProx_Model_Matrix}
 \title{Construct Sparse Design Matrix for FTRL-Proximal Model}
 \usage{
-FTRLProx_Model_Matrix(formula = ~., data, ...)
+FTRLProx_Model_Matrix(formula = ~., data, label = NULL, ...)
 }
 \arguments{
 \item{formula}{a model formula.}
 
 \item{data}{a \code{data.frame} or \code{data.table}. The original data.}
 
+\item{label}{a vector containing labels.}
+
 \item{...}{further arguments passed to \code{sparse.model.matrix}.}
 }
 \value{
-an object of class "dgCMatrix"
+constructed dataset, an object of class "ftrl.Dataset"
 }
 \description{
 Construct a sparse model or "design" matrix, form a formula and data frame for FTRL-Proximal Algorithm.
@@ -26,6 +28,6 @@ library(data.table)
 library(FeatureHashing)
 data(ipinyou)
 f <- ~ 0 + BidID + IP + City + AdExchange + BiddingPrice + PayingPrice
-m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE])
-hash.mapping(m.train)
+m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE],
+                                 label = as.numeric(ipinyou.train$IsClick))
 }

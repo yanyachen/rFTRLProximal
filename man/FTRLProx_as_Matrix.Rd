@@ -4,22 +4,24 @@
 \alias{FTRLProx_as_Matrix}
 \title{Transform Data Frame to Sparse Design Matrix for FTRL-Proximal Model}
 \usage{
-FTRLProx_as_Matrix(data)
+FTRLProx_as_Matrix(data, label = NULL)
 }
 \arguments{
 \item{data}{a \code{data.frame} or \code{data.table}. The original data.}
+
+\item{label}{a vector containing labels.}
 }
 \value{
-an object of class "dgCMatrix"
+constructed dataset, an object of class "ftrl.Dataset"
 }
 \description{
-Transform a data frame to sparse "design" matrix for FTRL-Proximal Algorithm.
+Transform a data frame to sparse design matrix for FTRL-Proximal Algorithm.
 Please always use this function to generate sparse matrix for training and prediction.
 }
 \examples{
 library(data.table)
 library(FeatureHashing)
 data(ipinyou)
-m.train <- FTRLProx_as_Matrix(ipinyou.train[, c("BiddingPrice", "PayingPrice"), with = FALSE])
-hash.mapping(m.train)
+m.train <- FTRLProx_as_Matrix(ipinyou.train[, c("BiddingPrice", "PayingPrice"), with = FALSE],
+                              label = as.numeric(ipinyou.train$IsClick))
 }

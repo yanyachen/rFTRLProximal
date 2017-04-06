@@ -7,26 +7,27 @@
 #'
 #' @param formula a model formula.
 #' @param data a \code{data.frame} or \code{data.table}. The original data.
+#' @param label a vector containing labels.
 #' @param ... further arguments passed to \code{sparse.model.matrix}.
-#' @return an object of class "dgCMatrix"
+#' @return constructed dataset, an object of class "ftrl.Dataset"
 #' @examples
 #' library(data.table)
 #' library(FeatureHashing)
 #' data(ipinyou)
 #' f <- ~ 0 + BidID + IP + City + AdExchange + BiddingPrice + PayingPrice
-#' m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE])
-#' hash.mapping(m.train)
+#' m.train <- FTRLProx_Model_Matrix(f, ipinyou.train[, -"IsClick", with = FALSE],
+#'                                  label = as.numeric(ipinyou.train$IsClick))
 #' @export
 
-FTRLProx_Model_Matrix <- function(formula = ~ ., data, ...) {
+FTRLProx_Model_Matrix <- function(formula = ~ ., data, label = NULL, ...) {
   # Sparse Design Matrix
-  x <- Matrix::sparse.model.matrix(object = formula, data = data, transpose = TRUE, ...)
+  X <- Matrix::sparse.model.matrix(object = formula, data = data, transpose = TRUE, row.names = TRUE, ...)
   # Create Mapping
-  Mapping <- (seq_len(nrow(x)) - 1) %>%
-    as.list(.) %>%
-    magrittr::set_names(., value = rownames(x)) %>%
-    as.environment(.)
-  attr(x, "mapping") <- Mapping
-  # Return Sparse Design Matrix
-  return(x)
+  Mapping <- data.table::data.table(Index = seq_len(nrow(X)),
+                                    Feature = rownames(X))
+  # Generating FTRLProx Dataset
+  FTRLProx_Dataset <- list(X = X, y = label, Mapping = Mapping)
+  class(FTRLProx_Dataset) <- "ftrl.Dataset"
+  # Return FTRLProx Dataset
+  return(FTRLProx_Dataset)
 }

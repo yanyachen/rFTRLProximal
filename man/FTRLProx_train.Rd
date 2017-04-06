@@ -4,14 +4,15 @@
 \alias{FTRLProx_train}
 \title{FTRL-Proximal Linear Model Training}
 \usage{
-FTRLProx_train(x, y, family = c("gaussian", "binomial", "poisson"),
-  params = list(alpha = 0.1, beta = 1, l1 = 1, l2 = 1), epoch = 1,
-  bagging_seeds = NULL, verbose = TRUE)
+FTRLProx_train(data, model = NULL, family = c("gaussian", "binomial",
+  "poisson"), params = list(alpha = 0.1, beta = 1, l1 = 1, l2 = 1, dropout =
+  0), epoch = 1, watchlist = list(), eval = NULL, patience = 0,
+  maximize = NULL, nthread = 1, verbose = TRUE)
 }
 \arguments{
-\item{x}{a transposed \code{dgCMatrix}.}
+\item{data}{a object of class \code{ftrl.Dataset}.}
 
-\item{y}{a vector containing labels.}
+\item{model}{a previously built model object to continue the training from.}
 
 \item{family}{link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.}
 
@@ -21,12 +22,20 @@ FTRLProx_train(x, y, family = c("gaussian", "binomial", "poisson"),
   \item \code{beta} beta in the per-coordinate learning rate
   \item \code{l1} L1 regularization parameter
   \item \code{l2} L2 regularization parameter
+  \item \code{dropout} percentage of the input features to drop from each sample
 }}
 
 \item{epoch}{The number of iterations over training data to train the model.}
 
-\item{bagging_seeds}{a vector containing random seeds for shuffling data.
-If provided, use parallel foreach to fit each model. Must register parallel before hand, such as doParallel or others.}
+\item{watchlist}{a named list, used to specify validation set monitoring during training.}
+
+\item{eval}{a custimized evaluation function, the first argument shoule be prediction, the second argument shoule be label.}
+
+\item{patience}{The number of rounds with no improvement in the evaluation metric in order to stop the training. User can specify 0 to disable early stopping.}
+
+\item{maximize}{whether to maximize the evaluation metric.}
+
+\item{nthread}{number of parallel threads used to run ftrl. Please set to 1 if your feature set is not sparse enough.}
 
 \item{verbose}{logical value. Indicating if the progress bar is displayed or not.}
 }
@@ -42,21 +51,20 @@ library(FeatureHashing)
 library(MLmetrics)
 data(ipinyou)
 m.train <- FTRLProx_Hashing(~ 0 + ., ipinyou.train[, -"IsClick", with = FALSE],
-                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
+                            hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                            label = as.numeric(ipinyou.train$IsClick))
 m.test <- FTRLProx_Hashing(~ 0 + ., ipinyou.test[,-"IsClick", with = FALSE],
-                           hash.size = 2^13, signed.hash = FALSE, verbose = TRUE)
-ftrl_model <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
+                           hash.size = 2^13, signed.hash = FALSE, verbose = TRUE,
+                           label = as.numeric(ipinyou.test$IsClick))
+ftrl_model <- FTRLProx_train(data = m.train, model = NULL,
                              family = "binomial",
-                             params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-                             epoch = 10, verbose = TRUE)
-ftrl_model_bagging <- FTRLProx_train(m.train, y = as.numeric(ipinyou.train$IsClick),
-                                     family = "binomial",
-                                     params = list(alpha = 0.01, beta = 0.1, l1 = 1.0, l2 = 1.0),
-                                     epoch = 10, bagging_seeds = 1:10, verbose = FALSE)
-pred_ftrl <- FTRLProx_predict(ftrl_model, newx = m.test)
-pred_ftrl_bagging <- FTRLProx_predict(ftrl_model_bagging, newx = m.test)
+                             params = list(alpha = 0.01, beta = 0.1,
+                                           l1 = 0.1, l2 = 0.1, dropout = 0), epoch = 50,
+                             watchlist = list(test = m.test),
+                             eval = AUC, patience = 5, maximize = TRUE,
+                             nthread = 1, verbose = TRUE)
+pred_ftrl <- FTRLProx_predict(ftrl_model, m.test)
 AUC(pred_ftrl, as.numeric(ipinyou.test$IsClick))
-AUC(pred_ftrl_bagging, as.numeric(ipinyou.test$IsClick))
 }
 \references{
 H. B. McMahan, G. Holt, D. Sculley, et al. "Ad click prediction: a view from the trenches".

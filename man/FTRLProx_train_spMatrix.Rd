@@ -4,12 +4,14 @@
 \alias{FTRLProx_train_spMatrix}
 \title{FTRL-Proximal Linear Model Fitting Function}
 \usage{
-FTRLProx_train_spMatrix(x, y, family, params, epoch, verbose)
+FTRLProx_train_spMatrix(x, y, state, family, params, epoch, nthread, verbose)
 }
 \arguments{
 \item{x}{a transposed \code{dgCMatrix}.}
 
 \item{y}{a vector containing labels.}
+
+\item{state}{a previously built model state to continue the training from.}
 
 \item{family}{link function to be used in the model. "gaussian", "binomial" and "poisson" are avaliable.}
 
@@ -19,17 +21,21 @@ FTRLProx_train_spMatrix(x, y, family, params, epoch, verbose)
   \item \code{beta} beta in the per-coordinate learning rate
   \item \code{l1} L1 regularization parameter
   \item \code{l2} L2 regularization parameter
+  \item \code{dropout} percentage of the input features to drop from each sample
 }}
 
 \item{epoch}{The number of iterations over training data to train the model.}
 
+\item{nthread}{number of parallel threads used to run ftrl.}
+
 \item{verbose}{logical value. Indicating if the progress bar is displayed or not.}
 }
 \value{
-a vector of linear model weights
+a list of ftrl model state.
 }
 \description{
 FTRLProx_train_spMatrix estimates the weights of linear model using FTRL-Proximal Algorithm.
 This function is an C++ implementation.
 This function is used internally and is not intended for end-user direct usage.
 }
+\keyword{internal}

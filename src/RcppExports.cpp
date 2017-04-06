@@ -6,53 +6,54 @@
 
 using namespace Rcpp;
 
-// FTRLProx_predict_spMatrix
-arma::vec FTRLProx_predict_spMatrix(arma::sp_mat x, arma::vec w, const std::string family);
-RcppExport SEXP rFTRLProximal_FTRLProx_predict_spMatrix(SEXP xSEXP, SEXP wSEXP, SEXP familySEXP) {
+// set_omp_threads
+void set_omp_threads(int n);
+RcppExport SEXP rFTRLProximal_set_omp_threads(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    set_omp_threads(n);
+    return R_NilValue;
+END_RCPP
+}
+// get_omp_threads
+int get_omp_threads();
+RcppExport SEXP rFTRLProximal_get_omp_threads() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_omp_threads());
+    return rcpp_result_gen;
+END_RCPP
+}
+// predict_spMatrix
+arma::vec predict_spMatrix(const S4& x, const arma::vec& w, const std::string family);
+RcppExport SEXP rFTRLProximal_predict_spMatrix(SEXP xSEXP, SEXP wSEXP, SEXP familySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const S4& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
-    rcpp_result_gen = Rcpp::wrap(FTRLProx_predict_spMatrix(x, w, family));
+    rcpp_result_gen = Rcpp::wrap(predict_spMatrix(x, w, family));
     return rcpp_result_gen;
 END_RCPP
 }
 // FTRLProx_train_spMatrix
-arma::vec FTRLProx_train_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch, bool verbose);
-RcppExport SEXP rFTRLProximal_FTRLProx_train_spMatrix(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP paramsSEXP, SEXP epochSEXP, SEXP verboseSEXP) {
+List FTRLProx_train_spMatrix(const S4& x, const arma::vec& y, const Nullable<List>& state, const std::string family, const List params, int epoch, int nthread, bool verbose);
+RcppExport SEXP rFTRLProximal_FTRLProx_train_spMatrix(SEXP xSEXP, SEXP ySEXP, SEXP stateSEXP, SEXP familySEXP, SEXP paramsSEXP, SEXP epochSEXP, SEXP nthreadSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< S4 >::type x(xSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const S4& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Nullable<List>& >::type state(stateSEXP);
     Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< const List >::type params(paramsSEXP);
     Rcpp::traits::input_parameter< int >::type epoch(epochSEXP);
+    Rcpp::traits::input_parameter< int >::type nthread(nthreadSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(FTRLProx_train_spMatrix(x, y, family, params, epoch, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// FTRLProx_validate_spMatrix
-List FTRLProx_validate_spMatrix(S4 x, arma::vec y, const std::string family, List params, int epoch, arma::sp_mat val_x, NumericVector val_y, Function eval, int patience, bool maximize, bool verbose);
-RcppExport SEXP rFTRLProximal_FTRLProx_validate_spMatrix(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP paramsSEXP, SEXP epochSEXP, SEXP val_xSEXP, SEXP val_ySEXP, SEXP evalSEXP, SEXP patienceSEXP, SEXP maximizeSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< S4 >::type x(xSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const std::string >::type family(familySEXP);
-    Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
-    Rcpp::traits::input_parameter< int >::type epoch(epochSEXP);
-    Rcpp::traits::input_parameter< arma::sp_mat >::type val_x(val_xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type val_y(val_ySEXP);
-    Rcpp::traits::input_parameter< Function >::type eval(evalSEXP);
-    Rcpp::traits::input_parameter< int >::type patience(patienceSEXP);
-    Rcpp::traits::input_parameter< bool >::type maximize(maximizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(FTRLProx_validate_spMatrix(x, y, family, params, epoch, val_x, val_y, eval, patience, maximize, verbose));
+    rcpp_result_gen = Rcpp::wrap(FTRLProx_train_spMatrix(x, y, state, family, params, epoch, nthread, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
