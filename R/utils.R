@@ -11,6 +11,20 @@ Mapping_DT_Gen <- function(Mapping_Vec) {
 }
 utils::globalVariables(c("Index"))
 
+#' Update Feature Mapping DT
+#' This is used for updating feature mapping from features hashing
+#'
+#' @importFrom magrittr %>% %T>%
+#' @keywords internal
+Mapping_DT_Update <- function(Mapping_Model, Mapping_Data) {
+  merge(Mapping_Model, Mapping_Data, by = "Index", all = TRUE) %T>%
+    magrittr::extract(., i = is.na(Feature.x), j = Feature := Feature.y) %T>%
+    magrittr::extract(., i = is.na(Feature.y), j = Feature := Feature.x) %T>%
+    magrittr::extract(., i = !is.na(Feature.x) & !is.na(Feature.y), j = Feature := paste(Feature.x, Feature.y, sep = "+")) %>%
+    magrittr::extract(., j = c("Index", "Feature"), with = FALSE)
+}
+utils::globalVariables(c("Feature.x", "Feature.y", "Feature"))
+
 #' Performance Printing Function
 #' This is used for printing model performance of each round
 #'

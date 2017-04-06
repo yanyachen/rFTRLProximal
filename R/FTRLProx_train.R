@@ -59,8 +59,7 @@ FTRLProx_train <- function(data, model = NULL,
   if (is.null(model)) {
     model_state_param <- list(state = NULL, family = family, params = params, mapping = data$Mapping)
   } else {
-    stopifnot(identical(model$mapping, data$Mapping))
-    model_state_param <- list(state = model$state, family = model$family, params = model$params, mapping = model$mapping)
+    model_state_param <- list(state = model$state, family = model$family, params = model$params, mapping = Mapping_DT_Update(model$mapping, data$Mapping))
   }
   # Model Computing
   watchlist_len <- length(watchlist)
