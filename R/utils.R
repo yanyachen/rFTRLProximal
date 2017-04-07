@@ -1,29 +1,41 @@
 #' Create Feature Mapping DT
 #' This is used for creating feature mapping from features hashing
 #'
-#' @importFrom magrittr %>%
+#' @importFrom magrittr %>% %T>%
 #' @keywords internal
 Mapping_DT_Gen <- function(Mapping_Vec) {
   data.table::data.table(Index = Mapping_Vec,
                          Feature = names(Mapping_Vec)) %>%
+    unique(., by = c("Index", "Feature")) %T>%
+    data.table::setorderv(., cols = c("Index", "Feature"), order = c(+1L, +1L)) %>%
     magrittr::extract(., j = .(Feature = paste(get("Feature"), collapse = "+")), by = "Index") %>%
     magrittr::extract(., i = order(Index, decreasing = FALSE))
 }
 utils::globalVariables(c("Index"))
 
+#' Decompose Feature Mapping DT
+#' This is used for decomposing feature mapping from features hashing
+#'
+#' @importFrom magrittr %>%
+#' @keywords internal
+Mapping_DT_Decompose <- function(Mapping) {
+  Mapping_Feature_Index <- Mapping$Index
+  Mapping_Feature_List <- strsplit(Mapping$Feature, split = "+", fixed = TRUE)
+  rep(Mapping_Feature_Index,
+      vapply(Mapping_Feature_List, length, integer(1))) %>%
+    magrittr::set_names(., unlist(Mapping_Feature_List))
+}
+
 #' Update Feature Mapping DT
 #' This is used for updating feature mapping from features hashing
 #'
-#' @importFrom magrittr %>% %T>%
+#' @importFrom magrittr %>%
 #' @keywords internal
 Mapping_DT_Update <- function(Mapping_Model, Mapping_Data) {
-  merge(Mapping_Model, Mapping_Data, by = "Index", all = TRUE) %T>%
-    magrittr::extract(., i = is.na(Feature.x), j = Feature := Feature.y) %T>%
-    magrittr::extract(., i = is.na(Feature.y), j = Feature := Feature.x) %T>%
-    magrittr::extract(., i = !is.na(Feature.x) & !is.na(Feature.y), j = Feature := paste(Feature.x, Feature.y, sep = "+")) %>%
-    magrittr::extract(., j = c("Index", "Feature"), with = FALSE)
+  Mapping_Vec <- c(Mapping_DT_Decompose(Mapping_Model),
+                   Mapping_DT_Decompose(Mapping_Data)) %>%
+    Mapping_DT_Gen(.)
 }
-utils::globalVariables(c("Feature.x", "Feature.y", "Feature"))
 
 #' Performance Printing Function
 #' This is used for printing model performance of each round
