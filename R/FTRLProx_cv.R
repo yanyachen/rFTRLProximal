@@ -100,7 +100,7 @@ FTRLProx_cv <- function(data, model = NULL,
         round_max <- which.max(Perf_CV[[3]])
         if (round_max == i - patience) break;
       } else {
-        round_min <- which.max(Perf_CV[[3]])
+        round_min <- which.min(Perf_CV[[3]])
         if (round_min == i - patience) break;
       }
     }

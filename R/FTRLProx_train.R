@@ -70,22 +70,17 @@ FTRLProx_train <- function(data, model = NULL,
                                               epoch = epoch, nthread = nthread, verbose = verbose)
   } else {
     FTRLProx_State <- model_state_param$state
-    watchlist_dt <- lapply(X = seq_len(1 + watchlist_len), FUN = function(i) vector(mode = "double", length = epoch)) %>%
+    watchlist_dt <- lapply(X = seq_len(watchlist_len), FUN = function(i) vector(mode = "double", length = epoch)) %>%
       data.table::as.data.table(.) %T>%
-      data.table::setnames(., old = names(.), new = c("train", names(watchlist)))
+      data.table::setnames(., old = names(.), new = names(watchlist))
     for (i in seq_len(epoch)) {
       FTRLProx_State <- FTRLProx_train_spMatrix(x = data$X, y = data$y,
                                                 state = FTRLProx_State,
                                                 family = model_state_param$family, params = model_state_param$params,
                                                 epoch = 1, nthread = nthread, verbose = FALSE)
       for (j in seq_along(watchlist_dt)) {
-        if (j == 1) {
-          perf <- eval(predict_spMatrix(data$X, FTRLProx_State$w, model_state_param$family) %>% as.double(.),
-                       data$y)
-        } else {
-          perf <- eval(predict_spMatrix(watchlist[[j - 1]]$X, FTRLProx_State$w, model_state_param$family) %>% as.double(.),
-                       watchlist[[j - 1]]$y)
-        }
+        perf <- eval(predict_spMatrix(watchlist[[j]]$X, FTRLProx_State$w, model_state_param$family) %>% as.double(.),
+                     watchlist[[j]]$y)
         data.table::set(watchlist_dt,
                         i = as.integer(i),
                         j = as.integer(j),
@@ -96,15 +91,14 @@ FTRLProx_train <- function(data, model = NULL,
       }
       if (patience != 0 & i > patience) {
         if (isTRUE(maximize)) {
-          round_max <- which.max(watchlist_dt[[2]])
+          round_max <- which.max(watchlist_dt[[1]])
           if (round_max == i - patience) break;
         } else {
-          round_min <- which.max(watchlist_dt[[2]])
+          round_min <- which.min(watchlist_dt[[1]])
           if (round_min == i - patience) break;
         }
       }
     }
-    perf_dt <- watchlist_dt[seq_len(i), ]
   }
   # Model Object
   FTRLProx_Model <- list(state = FTRLProx_State,
